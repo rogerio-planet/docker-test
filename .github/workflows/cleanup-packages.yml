@@ -1,4 +1,4 @@
-name: Prune Docker Images GHCR
+name: Prune Docker Images GHCR by parameters
 
 on:
   workflow_dispatch:
@@ -39,10 +39,10 @@ jobs:
           user: rogerio-planet 
           container: docker-test
           token: ${{ secrets.READ_PACKAGES }}
-          dry-run: true
-          prune-untagged: true
+          dry-run: ${{ github.event.inputs.dry_run || 'true' }}
+          prune-untagged: ${{ github.event.inputs.prune_untagged || 'true' }}
           keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
           keep-tags-regexes: |
-            dev-latest$|integration-latest$
+            ${{ github.event.inputs.keep_tags_regexes || 'dev-latest$|integration-latest$' }}
           prune-tags-regexes: |
-            ^(integration|dev)-((?!latest).)*$
+            ${{ github.event.inputs.prune_tags_regexes || '^(integration|dev)-((?!latest).)*$' }}

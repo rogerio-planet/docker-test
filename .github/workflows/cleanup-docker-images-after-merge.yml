@@ -1,4 +1,4 @@
-name: Cleanup Docker Images After Merge
+name: Cleanup docker images after the merge
 on:
   pull_request:
     types:
@@ -28,7 +28,7 @@ jobs:
           user: rogerio-planet
           container: docker-test
           token: ${{ secrets.READ_PACKAGES }}
-          dry-run: true
+          dry-run: false
           prune-untagged: true
           keep-tags-regexes: |
             dev-latest$|integration-latest$|latest$
