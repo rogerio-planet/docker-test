@@ -28,7 +28,7 @@ jobs:
           container: docker-test
           token: ${{ secrets.GITHUB_TOKEN }}
           dry-run: false
-          prune-untagged: true
+          prune-untagged: false
           keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
           keep-tags-regexes: |
             dev-latest$|integration-latest$

@@ -17,7 +17,7 @@ on:
         description: 'Set to true to prune untagged images'
         type: boolean
         required: false
-        default: true
+        default: false
       keep_tags_regexes:
         description: 'Regex patterns for tags to keep (one per line)'
         type: string
@@ -45,7 +45,7 @@ jobs:
           container: docker-test
           token: ${{ secrets.GITHUB_TOKEN }}
           dry-run: ${{ github.event.inputs.dry_run || 'true' }}
-          prune-untagged: ${{ github.event.inputs.prune_untagged || 'true' }}
+          prune-untagged: ${{ github.event.inputs.prune_untagged || 'false' }}
           keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
           keep-tags-regexes: |
             ${{ github.event.inputs.keep_tags_regexes || 'dev-latest$|integration-latest$' }}
