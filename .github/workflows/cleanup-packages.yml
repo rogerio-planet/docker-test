@@ -35,6 +35,7 @@ jobs:
       id-token: write
       contents: write
       packages: write
+      
     runs-on: ubuntu-latest
     steps:
       - name: Prune old images except env_dev-latest
