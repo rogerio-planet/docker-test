@@ -8,8 +8,9 @@ jobs:
   prune-after-merge:
     permissions:
       id-token: write
-      contents: read
+      contents: write
       packages: write
+      
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
