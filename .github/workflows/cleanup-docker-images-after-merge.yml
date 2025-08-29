@@ -31,5 +31,5 @@ jobs:
           dry-run: true
           prune-untagged: false
           keep-tags-regexes: |
-            env_dev-latest$|integration_tests-latest$|mas_common_integration_tests-latest$|nbarts-latest$|latest$|base$
+            dev-latest$|integration-latest$|latest$
           prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$
