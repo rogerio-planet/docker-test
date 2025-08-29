@@ -1,0 +1,35 @@
+name: Cleanup Docker Images After Merge
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  prune-after-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set image name from branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES }}
+        run: |
+          run: |
+          echo "BRANCH_NAME=$(echo \"${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}\" \
+          | tr '[:upper:]' '[:lower:]' \
+          | sed 's/[^a-z0-9]/_/g' \
+          | sed 's/^_*\|_*$//g')" >> $GITHUB_ENV
+
+      - name: Prune Docker image from branch merged
+        uses: vlaurin/action-ghcr-prune@v0.6.0
+        with:
+          organization: weareplanet
+          container: mas-migrations
+          token: ${{ secrets.READ_PACKAGES }}
+          dry-run: true
+          prune-untagged: false
+          keep-tags-regexes: |
+            env_dev-latest$|integration_tests-latest$|mas_common_integration_tests-latest$|nbarts-latest$|latest$|base$
+          prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$

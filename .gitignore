@@ -1,0 +1,9 @@
+.idea
+mas-migrations.iml
+
+.DS_Store
+__pycache__/
+
+*.zip
+
+target/**

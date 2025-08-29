@@ -1,0 +1,26 @@
+name: CI Build and Push
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - '**'
+  
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      contexts: ${{ matrix.context }}
+    secrets: inherit
+    strategy:
+      matrix:
+        context: ["dev", "integration"]

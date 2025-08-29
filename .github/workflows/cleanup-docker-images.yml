@@ -1,0 +1,31 @@
+name: Prune Docker Images GHCR
+
+on:
+  workflow_dispatch:
+    inputs:
+      number_of_days:
+        description: 'Number of days to keep images'
+        type: number
+        required: false
+        default: 15
+
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  prune-ghcr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune old images except env_dev-latest
+        uses: vlaurin/action-ghcr-prune@v0.6.0
+        with:
+          organization: weareplanet
+          container: mas-migrations
+          token: ${{ secrets.READ_PACKAGES }}
+          dry-run: true
+          prune-untagged: true
+          keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
+          keep-tags-regexes: |
+            dev-latest$|integration-latest$
+          prune-tags-regexes: |
+            ^(integration|dev)-((?!latest).)*$
