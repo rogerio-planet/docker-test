@@ -18,9 +18,11 @@ on:
 jobs:
   build-and-push:
     uses: ./.github/workflows/build-and-push.yml
-    permissions: 
-        id-token: write
-        contents: read
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      
     with:
       contexts: ${{ matrix.context }}
     secrets: inherit

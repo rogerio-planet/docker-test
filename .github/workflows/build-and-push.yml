@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
+      packages: write
 
     env:
       DOCKER_REGISTRY: ghcr.io/rogerio-planet
@@ -27,7 +28,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.READ_PACKAGES }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract branch name and set image tag
         run: |

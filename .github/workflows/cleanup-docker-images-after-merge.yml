@@ -6,8 +6,12 @@ on:
 
 jobs:
   prune-after-merge:
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -27,7 +31,7 @@ jobs:
         with:
           user: rogerio-planet
           container: docker-test
-          token: ${{ secrets.READ_PACKAGES }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           dry-run: false
           prune-untagged: true
           keep-tags-regexes: |
