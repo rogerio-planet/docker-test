@@ -6,9 +6,10 @@ on:
 
 jobs:
   prune-after-merge:
-    permissions: 
-        contents: read
-        packages: write
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
