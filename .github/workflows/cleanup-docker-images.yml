@@ -19,7 +19,7 @@ jobs:
       - name: Prune old images except env_dev-latest
         uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          organization: rogerio-planet
+          user: rogerio-planet
           container: docker-test
           token: ${{ secrets.READ_PACKAGES }}
           dry-run: true
