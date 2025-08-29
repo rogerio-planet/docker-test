@@ -29,7 +29,7 @@ jobs:
           container: docker-test
           token: ${{ secrets.READ_PACKAGES }}
           dry-run: true
-          prune-untagged: false
+          prune-untagged: true
           keep-tags-regexes: |
             dev-latest$|integration-latest$|latest$
           prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$
