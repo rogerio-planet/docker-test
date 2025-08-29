@@ -1,0 +1,48 @@
+name: Prune Docker Images GHCR
+
+on:
+  workflow_dispatch:
+    inputs:
+      number_of_days:
+        description: 'Number of days to keep images'
+        type: number
+        required: false
+        default: 15
+      dry_run:
+        description: 'Set to true to perform a dry run (no images will be deleted)'
+        type: boolean
+        required: false
+        default: true
+      prune_untagged:
+        description: 'Set to true to prune untagged images'
+        type: boolean
+        required: false
+        default: true
+      keep_tags_regexes:
+        description: 'Regex patterns for tags to keep (one per line)'
+        type: string
+        required: false
+        default: 'dev-latest$|integration-latest$'
+      prune_tags_regexes:
+        description: 'Regex patterns for tags to prune (one per line)'
+        type: string
+        required: false
+        default: '^(integration|dev)-((?!latest).)*$'
+      
+jobs:
+  prune-ghcr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune old images except env_dev-latest
+        uses: vlaurin/action-ghcr-prune@v0.6.0
+        with:
+          organization: rogerio-planet
+          container: docker-test
+          token: ${{ secrets.READ_PACKAGES }}
+          dry-run: true
+          prune-untagged: true
+          keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
+          keep-tags-regexes: |
+            dev-latest$|integration-latest$
+          prune-tags-regexes: |
+            ^(integration|dev)-((?!latest).)*$
