@@ -33,7 +33,7 @@ jobs:
           container: docker-test
           token: ${{ secrets.GITHUB_TOKEN }}
           dry-run: false
-          prune-untagged: true
+          prune-untagged: false
           keep-tags-regexes: |
             dev-latest$|integration-latest$|latest$
           prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$
