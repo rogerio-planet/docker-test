@@ -25,7 +25,7 @@ jobs:
       - name: Prune Docker image from branch merged
         uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          organization: rogerio-planet
+          user: rogerio-planet
           container: docker-test
           token: ${{ secrets.READ_PACKAGES }}
           dry-run: true
