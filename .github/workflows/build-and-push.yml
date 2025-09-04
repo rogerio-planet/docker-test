@@ -48,47 +48,19 @@ jobs:
           buildkitd-flags: |
             --debug
             
-#      - name: Build and push Docker image
-#        uses: docker/build-push-action@v5
-#        with:
-#          context: .
-#          push: true
-#          file: ${{ env.DOCKERFILE }}
-#          tags: |
-#            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
-#          build-args: CONTEXTS=${{ inputs.contexts }}
-#          no-cache: true
-#          platforms: linux/amd64,linux/arm64
-#          provenance: false
-
-      - name: Build and push amd64
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-amd64
-          platforms: linux/amd64
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
           build-args: CONTEXTS=${{ inputs.contexts }}
           no-cache: true
-      
-      - name: Build and push arm64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-arm64
-          platforms: linux/arm64
-          build-args: CONTEXTS=${{ inputs.contexts }}
-          no-cache: true
-      
-      - name: Create multi-arch manifest (final tag)
-        run: |
-          docker buildx imagetools create -t ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }} \
-            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-amd64 \
-            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-arm64
-      
+          platforms: linux/amd64,linux/arm64
+          provenance: false
+          outputs: type=image,push=true
+          
       - name: Clean up disk space
         run: |
           docker image prune -f
