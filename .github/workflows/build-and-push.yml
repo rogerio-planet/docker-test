@@ -45,12 +45,8 @@ jobs:
         with:
           driver: 'docker-container'
           platforms: linux/amd64
-          buildkitd-config-inline: |
-            [worker.oci]
-            max-parallelism = 1
-            provenance = false
-            progress = plain
-            platforms = ["linux/amd64"]
+          buildkitd-flags: |
+            --debug
             
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -63,8 +59,8 @@ jobs:
           build-args: CONTEXTS=${{ inputs.contexts }}
           no-cache: true
           platforms: linux/amd64
+          provenance: false
 
       - name: Clean up disk space
         run: |
-          docker system prune -af --filter "until=168h"
-          docker builder prune -af --filter "until=168h"
+          docker image prune -f
