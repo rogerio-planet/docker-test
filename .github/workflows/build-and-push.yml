@@ -54,8 +54,11 @@ jobs:
           context: .
           push: true
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
           build-args: CONTEXTS=${{ inputs.contexts }}
+          no-cache: true
+          platforms: linux/amd64
 
       - name: Clean up disk space
         run: |
