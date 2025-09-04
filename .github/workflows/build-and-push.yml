@@ -50,6 +50,7 @@ jobs:
             max-parallelism = 1
             provenance = false
             progress = plain
+            platforms = ["linux/amd64"]
             
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
