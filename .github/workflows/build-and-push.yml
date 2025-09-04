@@ -62,8 +62,7 @@ jobs:
           no-cache: true
           platforms: ${{ inputs.platforms }}
           provenance: false
-          push: false
-          outputs: type=image,push=true
+          push: true
           
       - name: Clean up disk space
         run: |
