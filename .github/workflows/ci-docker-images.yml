@@ -25,9 +25,7 @@ jobs:
       
     with:
       contexts: ${{ matrix.context }}
-      platforms: ${{ matrix.platforms }}
     secrets: inherit
     strategy:
       matrix:
         context: ["dev", "integration"]
-        platforms: ["linux/amd64", "linux/arm64"]
