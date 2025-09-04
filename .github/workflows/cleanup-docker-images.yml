@@ -1,4 +1,4 @@
-name: Prune Docker Images GHCR
+name: Schedule clean docker images
 
 on:
   workflow_dispatch:
@@ -14,16 +14,21 @@ on:
 
 jobs:
   prune-ghcr:
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      
     runs-on: ubuntu-latest
     steps:
       - name: Prune old images except env_dev-latest
         uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          organization: rogerio-planet
+          user: rogerio-planet
           container: docker-test
-          token: ${{ secrets.READ_PACKAGES }}
-          dry-run: true
-          prune-untagged: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: false
+          prune-untagged: false
           keep-younger-than: ${{ github.event.inputs.number_of_days || 15 }}
           keep-tags-regexes: |
             dev-latest$|integration-latest$

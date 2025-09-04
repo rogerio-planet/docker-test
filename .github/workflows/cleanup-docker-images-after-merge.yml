@@ -1,4 +1,4 @@
-name: Cleanup Docker Images After Merge
+name: Cleanup docker images after the merge
 on:
   pull_request:
     types:
@@ -6,8 +6,12 @@ on:
 
 jobs:
   prune-after-merge:
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -25,11 +29,11 @@ jobs:
       - name: Prune Docker image from branch merged
         uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
-          organization: rogerio-planet
+          user: rogerio-planet
           container: docker-test
-          token: ${{ secrets.READ_PACKAGES }}
-          dry-run: true
-          prune-untagged: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: false
+          prune-untagged: false
           keep-tags-regexes: |
             dev-latest$|integration-latest$|latest$
           prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$

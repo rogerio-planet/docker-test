@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
+      packages: write
 
     env:
       DOCKER_REGISTRY: ghcr.io/rogerio-planet
@@ -27,7 +28,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.READ_PACKAGES }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract branch name and set image tag
         run: |
@@ -43,20 +44,23 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           driver: 'docker-container'
-          buildkitd-config-inline: |
-            [worker.oci]
-            max-parallelism = 1
-
+          platforms: linux/amd64
+          buildkitd-flags: |
+            --debug
+            
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
           build-args: CONTEXTS=${{ inputs.contexts }}
+          no-cache: true
+          platforms: linux/amd64
+          provenance: false
 
       - name: Clean up disk space
         run: |
-          docker system prune -af --filter "until=168h"
-          docker builder prune -af --filter "until=168h"
+          docker image prune -f
