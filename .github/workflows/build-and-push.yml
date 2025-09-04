@@ -45,17 +45,21 @@ jobs:
         with:            
           install: true
           version: latest
-    
-      - name: Build and push Docker image (single step)
-        run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            --tag ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }} \
-            --build-arg CONTEXTS=${{ inputs.contexts }} \
-            --no-cache \
-            --provenance=false \
-            --push \
-            .      
+          platforms: linux/amd64
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
+          build-args: CONTEXTS=${{ inputs.contexts }}
+          no-cache: true
+          platforms: linux/amd64
+          provenance: false
+          push: false
+          outputs: type=image,push=true
           
       - name: Clean up disk space
         run: |
