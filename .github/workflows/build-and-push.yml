@@ -32,36 +32,30 @@ jobs:
             IMAGE_TAG="${{ inputs.contexts }}-${BRANCH_NAME}"
           fi
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-      
+
       - name: Login to Docker registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          install: true
-          cleanup: true
+        run: |
+          docker buildx create --name mybuilder --use --bootstrap
+          docker buildx inspect --bootstrap
           
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ inputs.context }}
-          push: true
-          file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
-          build-args: CONTEXTS=${{ inputs.contexts }}
-          platforms: linux/amd64,linux/arm64
-          provenance: false
-          outputs: type=registry,push=true,annotation-manifest.org.opencontainers.image.source=https://github.com/${{ github.repository }}
-          sbom: false
-          no-cache: true
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --build-arg CONTEXTS=${{ inputs.contexts }} \
+            --tag ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }} \
+            --file ${{ env.DOCKERFILE }} \
+            --push \
+            --provenance=false \
+            --sbom=false \
+            .
           
       - name: Clean up disk space
         if: always()
         run: |
-          docker builder prune -a -f
-          docker system prune -a -f
+          docker buildx rm mybuilder || true
+          docker system prune -f
