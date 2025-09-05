@@ -42,23 +42,26 @@ jobs:
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+        with:
+          install: true
+          cleanup: true
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{ inputs.context }}
           push: true
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
           build-args: CONTEXTS=${{ inputs.contexts }}
           platforms: linux/amd64,linux/arm64
           provenance: false
+          outputs: type=registry,push=true,annotation-manifest.org.opencontainers.image.source=https://github.com/${{ github.repository }}
           sbom: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
           
       - name: Clean up disk space
         if: always()
         run: |
-          docker builder prune -f
-          docker system prune -f
+          docker builder prune -a -f
+          docker system prune -a -f
