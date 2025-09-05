@@ -42,10 +42,6 @@ jobs:
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          platforms: linux/amd64,linux/arm64
-
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -57,10 +53,12 @@ jobs:
           build-args: CONTEXTS=${{ inputs.contexts }}
           platforms: linux/amd64,linux/arm64
           provenance: false
-          outputs: type=registry
+          sbom: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           
       - name: Clean up disk space
         if: always()
         run: |
-          docker buildx rm builder || true
+          docker builder prune -f
           docker system prune -f
