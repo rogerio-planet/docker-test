@@ -6,4 +6,4 @@ LABEL org.opencontainers.image.description="docker-test"
 ARG CONTEXTS=env_dev
 ENV CONTEXTS=${CONTEXTS}
 
-CMD ["sh", "-c", "echo 'hello my world-$CONTEXTS'"]
+CMD ["sh", "-c", "echo \"hello my world - ${CONTEXTS}\""]
