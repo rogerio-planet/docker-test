@@ -10,7 +10,7 @@ jobs:
       id-token: write
       contents: write
       packages: write
-      
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,10 +18,11 @@ jobs:
 
       - name: Set image name from branch
         run: |
-          echo "BRANCH_NAME=$(echo \"${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}\" \
-          | tr '[:upper:]' '[:lower:]' \
-          | sed 's/[^a-z0-9]/_/g' \
-          | sed 's/^_*\|_*$//g')" >> $GITHUB_ENV
+          # Para PRs fechados, usa o head ref do evento
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/^_*\|_*$//g')
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "Cleaning up images for branch: $BRANCH_NAME"
 
       - name: Prune Docker images from merged branch
         uses: vlaurin/action-ghcr-prune@v0.6.0
@@ -32,6 +33,6 @@ jobs:
           dry-run: false
           prune-untagged: false
           keep-tags-regexes: |
-            ^(dev|integration)-latest$
+            ^(dev|integration)-latest$|^(dev|integration)-latest-linux-(amd64|arm64)$
           prune-tags-regexes: |
             ^(dev|integration)-${{ env.BRANCH_NAME }}$|^(dev|integration)-${{ env.BRANCH_NAME }}-linux-(amd64|arm64)$
