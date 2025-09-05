@@ -17,16 +17,13 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set image name from branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES }}
         run: |
-          run: |
           echo "BRANCH_NAME=$(echo \"${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}\" \
           | tr '[:upper:]' '[:lower:]' \
           | sed 's/[^a-z0-9]/_/g' \
           | sed 's/^_*\|_*$//g')" >> $GITHUB_ENV
 
-      - name: Prune Docker image from branch merged
+      - name: Prune Docker images from merged branch
         uses: vlaurin/action-ghcr-prune@v0.6.0
         with:
           user: rogerio-planet
@@ -35,5 +32,6 @@ jobs:
           dry-run: false
           prune-untagged: false
           keep-tags-regexes: |
-            dev-latest$|integration-latest$|latest$
-          prune-tags-regexes: .*.${{ env.BRANCH_NAME }}$
+            ^(dev|integration)-latest$
+          prune-tags-regexes: |
+            ^(dev|integration)-${{ env.BRANCH_NAME }}$|^(dev|integration)-${{ env.BRANCH_NAME }}-linux-(amd64|arm64)$
