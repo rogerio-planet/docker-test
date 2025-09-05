@@ -56,7 +56,8 @@ jobs:
           push: true
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-${{ env.PLATFORM_TAG }}
-          build-args: CONTEXTS=${{ inputs.contexts }}-${{ matrix.platform }}-${{ env.IMAGE_TAG }}
+          build-args: |
+            CONTEXTS=${{ inputs.contexts }}-${{ matrix.platform }}-${{ env.IMAGE_TAG }}
           platforms: ${{ matrix.platform }}
           provenance: false
           
