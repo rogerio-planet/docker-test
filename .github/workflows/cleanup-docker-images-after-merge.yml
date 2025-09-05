@@ -31,7 +31,7 @@ jobs:
           container: docker-test
           token: ${{ secrets.GITHUB_TOKEN }}
           dry-run: false
-          prune-untagged: false
+          prune-untagged: true
           keep-tags-regexes: |
             ^(dev|integration)-latest$|^(dev|integration)-latest-linux-(amd64|arm64)$
           prune-tags-regexes: |
