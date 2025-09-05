@@ -71,6 +71,10 @@ jobs:
     permissions:
       contents: read
       packages: write          
+      
+    env:
+      DOCKER_REGISTRY: ghcr.io/rogerio-planet
+      
     steps:
       - name: Extract branch name and set image tag
         run: |
