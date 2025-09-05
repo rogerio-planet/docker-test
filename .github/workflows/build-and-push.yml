@@ -19,10 +19,59 @@ jobs:
       DOCKER_REGISTRY: ghcr.io/rogerio-planet
       DOCKERFILE: Dockerfile
 
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Extract branch name and set image tag
+        run: |
+          BRANCH_NAME=$(echo "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g')
+          if [ "$BRANCH_NAME" == "main" ]; then
+            IMAGE_TAG="${{ inputs.contexts }}-latest"
+          else
+            IMAGE_TAG="${{ inputs.contexts }}-${BRANCH_NAME}"
+          fi
+          PLATFORM_TAG=$(echo "${{ matrix.platform }}" | sed 's/\//-/g')
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "PLATFORM_TAG=$PLATFORM_TAG" >> $GITHUB_ENV
+
+      - name: Login to Docker registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Set up Docker Buildx
+        run: |
+          docker buildx create --name builder-${{ env.PLATFORM_TAG }} --use --bootstrap
+          
+      - name: Build and push platform-specific image
+        run: |
+          docker buildx build \
+            --platform ${{ matrix.platform }} \
+            --build-arg CONTEXTS=${{ inputs.contexts }} \
+            --tag ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-${{ env.PLATFORM_TAG }} \
+            --file ${{ env.DOCKERFILE }} \
+            --push \
+            --provenance=false \
+            --sbom=false \
+            .
+          
+      - name: Clean up
+        if: always()
+        run: |
+          docker buildx rm builder-${{ env.PLATFORM_TAG }} || true
+          docker system prune -f
+
+  create-manifest:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          
+    steps:
       - name: Extract branch name and set image tag
         run: |
           BRANCH_NAME=$(echo "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g')
@@ -37,25 +86,18 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Set up Docker Buildx
+      - name: Create and push manifest
         run: |
-          docker buildx create --name mybuilder --use --bootstrap
-          docker buildx inspect --bootstrap
-          
-      - name: Build and push Docker image
+          docker manifest create ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }} \
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-linux-amd64 \
+            ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-linux-arm64
+          docker manifest push ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}
+
+      - name: Clean up platform-specific tags
         run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            --build-arg CONTEXTS=${{ inputs.contexts }} \
-            --tag ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }} \
-            --file ${{ env.DOCKERFILE }} \
-            --push \
-            --provenance=false \
-            --sbom=false \
-            .
-          
-      - name: Clean up disk space
-        if: always()
-        run: |
-          docker buildx rm mybuilder || true
-          docker system prune -f
+          docker run --rm -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            ghcr.io/regclient/regctl:latest \
+            image delete ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-linux-amd64 || true
+          docker run --rm -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            ghcr.io/regclient/regctl:latest \
+            image delete ${{ env.DOCKER_REGISTRY }}/docker-test:${{ env.IMAGE_TAG }}-linux-arm64 || true
